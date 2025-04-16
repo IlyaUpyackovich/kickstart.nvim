@@ -90,6 +90,9 @@ P.S. You can delete this when you're done too. It's your config now! :)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
 
@@ -673,7 +676,7 @@ require('lazy').setup({
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`ts_ls`) will work just fine
-        ts_ls = {},
+        -- ts_ls = {},
         --
 
         lua_ls = {
@@ -716,6 +719,12 @@ require('lazy').setup({
         automatic_installation = false,
         handlers = {
           function(server_name)
+            -- Пропускаем настройку ts_ls через lspconfig,
+            -- так как typescript-tools сделает это сам
+            if server_name == 'ts_ls' then
+              return
+            end
+
             local server = servers[server_name] or {}
             -- This handles overriding only values explicitly passed
             -- by the server configuration above. Useful when disabling
@@ -723,6 +732,48 @@ require('lazy').setup({
             server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
             require('lspconfig')[server_name].setup(server)
           end,
+        },
+      }
+    end,
+  },
+
+  {
+    'pmizio/typescript-tools.nvim',
+    dependencies = { 'nvim-lua/plenary.nvim', 'neovim/nvim-lspconfig' },
+    -- Настраиваем через config = function() для передачи capabilities
+    config = function()
+      local api = require 'typescript-tools.api'
+      local capabilities = require('blink.cmp').get_lsp_capabilities()
+
+      require('typescript-tools').setup {
+        capabilities = capabilities,
+        settings = {
+          -- Пример: указать путь к локальному tsserver, если нужно
+          -- tsserver_path = vim.fn.getcwd() .. '/node_modules/.bin/tsserver',
+          -- Пример: какие действия выносить как code actions
+          expose_as_code_action = { 'fix_all', 'add_missing_imports', 'remove_unused' },
+          -- jsx_close_tag = {
+          --   enable = true,
+          --   filetypes = { 'javascriptreact', 'typescriptreact' },
+          -- },
+        },
+        on_attach = function(client, bufnr)
+          -- Стандартные LSP маппинги (grr, grd и т.д.) уже настроены
+          -- глобально через LspAttach autocmd.
+          -- Здесь можно добавить *специфичные* для typescript-tools маппинги:
+          -- local map = function(keys, func, desc)
+          --   vim.keymap.set('n', keys, func, { buffer = bufnr, desc = 'TS: ' .. desc })
+          -- end
+          -- map('<leader>tsi', require('typescript-tools').organize_imports, 'Organize Imports')
+          -- map('<leader>tsa', require('typescript-tools').add_missing_imports, 'Add Missing Imports')
+          -- map('<leader>tsx', require('typescript-tools').fix_all, 'Fix All')
+        end,
+
+        handlers = {
+          ['textDocument/publishDiagnostics'] = api.filter_diagnostics {
+            6133, -- noUnusedLocals
+            6138, -- noUnusedParameters
+          },
         },
       }
     end,
@@ -764,7 +815,10 @@ require('lazy').setup({
         -- python = { "isort", "black" },
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
-        -- javascript = { "prettierd", "prettier", stop_after_first = true },
+        typescript = { 'prettierd', 'typescript-tools', 'prettier' },
+        javascript = { 'prettierd', 'typescript-tools', 'prettier' },
+        typescriptreact = { 'prettierd', 'typescript-tools', 'prettier' },
+        javascriptreact = { 'prettierd', 'typescript-tools', 'prettier' },
       },
     },
   },
@@ -842,7 +896,7 @@ require('lazy').setup({
       completion = {
         -- By default, you may press `<c-space>` to show the documentation.
         -- Optionally, set `auto_show = true` to show the documentation after a delay.
-        documentation = { auto_show = false, auto_show_delay_ms = 500 },
+        documentation = { auto_show = true, auto_show_delay_ms = 500 },
       },
 
       sources = {
