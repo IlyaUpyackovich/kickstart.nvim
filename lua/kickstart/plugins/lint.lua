@@ -18,7 +18,7 @@ return {
         end
         local start_path = vim.fs.dirname(current_file_path)
         -- Ищем eslint.config.js вверх по дереву
-        local config_files = vim.fs.find('eslint.config.js', {
+        local config_files = vim.fs.find({ 'eslint.config.js', 'eslint.config.mjs' }, {
           upward = true,
           stop = vim.loop.os_homedir(), -- Останавливаемся в домашней директории
           path = start_path,
