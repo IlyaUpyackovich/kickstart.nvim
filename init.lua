@@ -1083,6 +1083,21 @@ require('lazy').setup({
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   { import = 'custom.plugins' },
+
+  {
+    'klen/nvim-config-local',
+    config = function()
+      require('config-local').setup {
+        config_files = { '.nvim.lua', '.nvimrc', '.exrc' },
+        hashfile = vim.fn.stdpath 'data' .. '/config-local',
+        autocommands_create = true,
+        commands_create = true,
+        silent = false,
+        lookup_parents = false,
+      }
+    end,
+    event = { 'VimEnter' },
+  },
   --
   -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
   -- Or use telescope!
