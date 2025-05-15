@@ -209,6 +209,7 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 -- vim.keymap.set("n", "<C-S-k>", "<C-w>K", { desc = "Move window to the upper" })
 
 vim.keymap.set('n', '<leader>tn', ':tabnew<CR>')
+
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
@@ -691,6 +692,20 @@ require('lazy').setup({
         },
         -- clangd = {},
         gopls = {},
+        html = {
+          filetypes = { 'html', 'templ' },
+        },
+        templ = {},
+        emmet_ls = {
+          filetypes = { 'html', 'css', 'templ', 'typescriptreact', 'javascriptreact' },
+          init_options = {
+            html = {
+              options = {
+                ['bem.enabled'] = true,
+              },
+            },
+          },
+        },
         -- pyright = {},
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
@@ -758,6 +773,8 @@ require('lazy').setup({
           end,
         },
       }
+
+      vim.filetype.add { extension = { templ = 'templ' } }
     end,
   },
 
@@ -835,6 +852,7 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
+        templ = { 'lsp' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
@@ -1042,7 +1060,7 @@ require('lazy').setup({
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'templ' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -1051,6 +1069,9 @@ require('lazy').setup({
         --  If you are experiencing weird indenting issues, add the language to
         --  the list of additional_vim_regex_highlighting and disabled languages for indent.
         additional_vim_regex_highlighting = { 'ruby' },
+      },
+      dependencies = {
+        { 'vrischmann/tree-sitter-templ' },
       },
       indent = { enable = true, disable = { 'ruby' } },
     },
