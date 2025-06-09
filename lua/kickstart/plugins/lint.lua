@@ -1,9 +1,9 @@
 vim.env.ESLINT_D_PPID = vim.fn.getpid()
 
 return {
-  { -- Linting
+  {
     'mfussenegger/nvim-lint',
-    event = { 'BufReadPre', 'BufNewFile' }, -- События для загрузки плагина
+    event = { 'BufReadPre', 'BufNewFile' },
     config = function()
       local lint = require 'lint'
 
@@ -37,6 +37,7 @@ return {
         typescript = { 'eslint_d' },
         javascriptreact = { 'eslint_d' },
         typescriptreact = { 'eslint_d' },
+        ruby = { 'ruby' },
       }
 
       -- Создаем автокоманду для запуска линтинга
