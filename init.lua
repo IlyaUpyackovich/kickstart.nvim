@@ -529,9 +529,9 @@ require('lazy').setup({
 
         local function safe_telescope(fn, name)
           return function()
-            local ok = pcall(fn)
+            local ok, err = pcall(fn)
             if not ok then
-              vim.notify('LSP: no results for ' .. name, vim.log.levels.WARN)
+              vim.notify('LSP: ' .. name .. ' - ' .. tostring(err), vim.log.levels.WARN)
             end
           end
         end
