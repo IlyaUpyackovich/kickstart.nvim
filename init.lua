@@ -502,16 +502,26 @@ require('lazy').setup({
           vim.keymap.set(mode, keys, func, { buffer = bufnr, desc = 'LSP: ' .. desc })
         end
 
-        -- Все твои старые горячие клавиши сохраняются здесь
+        local telescope = require 'telescope.builtin'
+
+        local function safe_telescope(fn, name)
+          return function()
+            local ok = pcall(fn)
+            if not ok then
+              vim.notify('LSP: no results for ' .. name, vim.log.levels.WARN)
+            end
+          end
+        end
+
+        vim.keymap.set('n', 'grd', safe_telescope(telescope.lsp_definitions, 'definitions'), { desc = 'Goto Definition' })
+        vim.keymap.set('n', 'gri', safe_telescope(telescope.lsp_implementations, 'implementations'), { desc = 'Goto Implementation' })
+        vim.keymap.set('n', 'grr', safe_telescope(telescope.lsp_references, 'references'), { desc = 'Goto References' })
+        vim.keymap.set('n', 'gO', safe_telescope(telescope.lsp_document_symbols, 'document symbols'), { desc = 'Document Symbols' })
+
         map('grn', vim.lsp.buf.rename, '[R]e[n]ame')
         map('gra', vim.lsp.buf.code_action, '[G]oto Code [A]ction', { 'n', 'x' })
-        map('grr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
-        map('gri', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
-        map('grd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
         map('grD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
-        map('gO', require('telescope.builtin').lsp_document_symbols, 'Open Document Symbols')
         map('gW', require('telescope.builtin').lsp_dynamic_workspace_symbols, 'Open Workspace Symbols')
-        map('grt', require('telescope.builtin').lsp_type_definitions, '[G]oto [T]ype Definition')
 
         local function client_supports_method(c, method)
           return c.supports_method and c:supports_method(method)
@@ -582,7 +592,30 @@ require('lazy').setup({
       -- Мы настраиваем каждый сервер отдельно, передавая ему on_attach и capabilities.
 
       vim.lsp.config('gopls', { on_attach = on_attach, capabilities = capabilities })
-      vim.lsp.config('solargraph', { on_attach = on_attach, capabilities = capabilities })
+      vim.lsp.config('vtsls', { on_attach = on_attach, capabilities = capabilities })
+      vim.lsp.config('solargraph', {
+        on_attach = on_attach,
+        capabilities = capabilities,
+        settings = {
+          solargraph = {
+            diagnostics = true,
+            completion = true,
+            hover = true,
+            formatting = true,
+            symbols = true,
+            definitions = true,
+            rename = true,
+            references = true,
+            folding = true,
+            useBundler = false,
+            externalDocs = false,
+            autoformat = false,
+          },
+        },
+        init_options = {
+          formatting = true,
+        },
+      })
       vim.lsp.config('templ', { on_attach = on_attach, capabilities = capabilities })
 
       vim.lsp.config('jsonls', {
@@ -606,7 +639,13 @@ require('lazy').setup({
       })
 
       vim.lsp.config('emmet_ls', {
-        on_attach = on_attach,
+        on_attach = function(client, bufnr)
+          on_attach(client, bufnr)
+
+          if client.server_capabilities.completionProvider then
+            client.server_capabilities.completionProvider.resolveProvider = false
+          end
+        end,
         capabilities = capabilities,
         filetypes = { 'html', 'css', 'templ', 'typescriptreact', 'javascriptreact' },
         init_options = {
@@ -639,54 +678,20 @@ require('lazy').setup({
         'templ',
         'emmet_ls',
         'lua_ls',
+        'vtsls',
       }
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
       -- Твои кастомные filetype ассоциации остаются здесь
       vim.filetype.add { extension = { templ = 'templ' } }
       vim.filetype.add { extension = { slim = 'slim' } }
-    end,
-  },
 
-  {
-    'pmizio/typescript-tools.nvim',
-    dependencies = { 'nvim-lua/plenary.nvim', 'neovim/nvim-lspconfig' },
-    -- Настраиваем через config = function() для передачи capabilities
-    config = function()
-      local api = require 'typescript-tools.api'
-      local capabilities = require('blink.cmp').get_lsp_capabilities()
-
-      require('typescript-tools').setup {
-        capabilities = capabilities,
-        settings = {
-          -- Пример: указать путь к локальному tsserver, если нужно
-          -- tsserver_path = vim.fn.getcwd() .. '/node_modules/.bin/tsserver',
-          -- Пример: какие действия выносить как code actions
-          expose_as_code_action = { 'fix_all', 'add_missing_imports', 'remove_unused' },
-          -- jsx_close_tag = {
-          --   enable = true,
-          --   filetypes = { 'javascriptreact', 'typescriptreact' },
-          -- },
-        },
-        on_attach = function(client, bufnr)
-          -- Стандартные LSP маппинги (grr, grd и т.д.) уже настроены
-          -- глобально через LspAttach autocmd.
-          -- Здесь можно добавить *специфичные* для typescript-tools маппинги:
-          -- local map = function(keys, func, desc)
-          --   vim.keymap.set('n', keys, func, { buffer = bufnr, desc = 'TS: ' .. desc })
-          -- end
-          -- map('<leader>tsi', require('typescript-tools').organize_imports, 'Organize Imports')
-          -- map('<leader>tsa', require('typescript-tools').add_missing_imports, 'Add Missing Imports')
-          -- map('<leader>tsx', require('typescript-tools').fix_all, 'Fix All')
-        end,
-
-        handlers = {
-          ['textDocument/publishDiagnostics'] = api.filter_diagnostics {
-            6133, -- noUnusedLocals
-            6138, -- noUnusedParameters
-          },
-        },
-      }
+      -- Enable all configured LSP servers to auto-start
+      -- With Neovim 0.11+ vim.lsp.config(), explicit enable is needed for auto-start
+      local servers = { 'gopls', 'vtsls', 'solargraph', 'templ', 'jsonls', 'html', 'emmet_ls', 'lua_ls' }
+      for _, server in ipairs(servers) do
+        vim.lsp.enable(server)
+      end
     end,
   },
 
@@ -723,14 +728,11 @@ require('lazy').setup({
       formatters_by_ft = {
         lua = { 'stylua' },
         templ = {},
-        -- Conform can also run multiple formatters sequentially
-        -- python = { "isort", "black" },
-        --
-        -- You can use 'stop_after_first' to run the first available formatter from the list
         typescript = { 'prettierd', 'prettier', stop_after_first = true },
         javascript = { 'prettierd', 'prettier', stop_after_first = true },
         typescriptreact = { 'prettierd', 'prettier', stop_after_first = true },
         javascriptreact = { 'prettierd', 'prettier', stop_after_first = true },
+        markdown = { 'prettierd', 'prettier', stop_after_first = true },
       },
     },
   },
@@ -829,32 +831,6 @@ require('lazy').setup({
       -- See :h blink-cmp-config-fuzzy for more information
       fuzzy = {
         implementation = 'prefer_rust',
-        sorts = {
-          (function()
-            local source_priority = {
-              lsp = 1,
-              lazydev = 2,
-              path = 3,
-              buffer = 4,
-              snippets = 10,
-              lua_snip = 10,
-              -- add more if needed
-            }
-
-            return function(a, b)
-              local a_priority = source_priority[a.source_id] or 99
-              local b_priority = source_priority[b.source_id] or 99
-
-              if a_priority ~= b_priority then
-                return a_priority < b_priority
-              else
-                return nil
-              end
-            end
-          end)(),
-          'sort_text',
-          'score',
-        },
       },
 
       -- Shows a signature help window while you type arguments for a function
@@ -984,7 +960,7 @@ require('lazy').setup({
         autocommands_create = true,
         commands_create = true,
         silent = false,
-        lookup_parents = false,
+        lookup_parents = true,
       }
     end,
     event = { 'VimEnter' },
