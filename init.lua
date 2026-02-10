@@ -1223,6 +1223,81 @@ require('lazy').setup({
     },
   },
 
+  { -- npm/yarn/pnpm package manager
+    'vuki656/package-info.nvim',
+    dependencies = 'MunifTanjim/nui.nvim',
+    event = 'BufRead package.json',
+    config = function()
+      require('package-info').setup {
+        colors = {
+          up_to_date = '#3C4048',
+          outdated = '#d19a66',
+        },
+        icons = {
+          enable = true,
+          style = {
+            up_to_date = '  ',
+            outdated = '  ',
+          },
+        },
+        autostart = true,
+        hide_up_to_date = false,
+        hide_unstable_versions = false,
+      }
+    end,
+    keys = {
+      {
+        '<leader>ns',
+        function()
+          require('package-info').show { force = true }
+        end,
+        desc = '[N]pm [S]how versions',
+      },
+      {
+        '<leader>nc',
+        function()
+          require('package-info').hide()
+        end,
+        desc = '[N]pm [C]lear versions',
+      },
+      {
+        '<leader>nt',
+        function()
+          require('package-info').toggle()
+        end,
+        desc = '[N]pm [T]oggle versions',
+      },
+      {
+        '<leader>nu',
+        function()
+          require('package-info').update()
+        end,
+        desc = '[N]pm [U]pdate package',
+      },
+      {
+        '<leader>nd',
+        function()
+          require('package-info').delete()
+        end,
+        desc = '[N]pm [D]elete package',
+      },
+      {
+        '<leader>ni',
+        function()
+          require('package-info').install()
+        end,
+        desc = '[N]pm [I]nstall package',
+      },
+      {
+        '<leader>np',
+        function()
+          require('package-info').change_version()
+        end,
+        desc = '[N]pm Change [P]ackage version',
+      },
+    },
+  },
+
   -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
   -- place them in the correct locations.
