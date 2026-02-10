@@ -1283,8 +1283,8 @@ require('lazy').setup({
     config = function()
       require('package-info').setup {
         highlights = {
-          up_to_date = 'Comment', -- Gray for up-to-date packages
-          outdated = 'WarningMsg', -- Orange/warning color for outdated packages
+          up_to_date = { fg = '#3C4048' }, -- Gray for up-to-date packages
+          outdated = { fg = '#d19a66' }, -- Orange for outdated packages
         },
         icons = {
           enable = true,
