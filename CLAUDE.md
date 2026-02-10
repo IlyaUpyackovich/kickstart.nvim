@@ -1,197 +1,247 @@
-# CLAUDE.md
+# CLAUDE.md - AI Agent Context
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides architectural context and conventions for AI agents working on this Neovim configuration.
 
-## Project Overview
+## Repository Context
 
-This is a personal Neovim configuration based on Kickstart.nvim, designed as a single-file (`init.lua`) configuration with modular plugin extensions.
+**Type**: Personal Neovim configuration
+**Base**: Kickstart.nvim (single-file init.lua + modular extensions)
+**User Workflow**: TypeScript/React/React Native/Expo + Go/htmx/templ development
+**Neovim Version**: 0.11+ (uses new LSP API)
 
-## Architecture
+## Architecture Principles
 
-### Plugin Management
-- **Plugin Manager**: lazy.nvim (installed in `init.lua:229-237`)
-- **Plugin Locations**:
-  - Core plugins: defined directly in `init.lua` line 250+
-  - Kickstart plugins: `lua/kickstart/plugins/*.lua` (optional components like debug, neo-tree, gitsigns)
-  - Custom plugins: `lua/custom/plugins/*.lua` (auto-imported via line 945)
+### Single-File Core + Modular Extensions
+- **Core**: `init.lua` contains all essential configuration (~1400 lines)
+- **Kickstart plugins**: `lua/kickstart/plugins/*.lua` (optional components)
+- **Custom plugins**: `lua/custom/plugins/*.lua` (auto-imported, user-specific)
+- **Rationale**: Easy to share core config while allowing personal customization
 
-### LSP Configuration (Neovim 0.11+)
-This config uses the **new Neovim 0.11+ LSP API** (`vim.lsp.config`) instead of lspconfig's `setup()`:
-- LSP servers configured: `init.lua:594-668` using `vim.lsp.config(server_name, config)`
-- Server installation managed by Mason (`mason.nvim`, `mason-lspconfig.nvim`, `mason-tool-installer.nvim`)
-- Common on_attach logic: `init.lua:499-558` (sets up keymaps, document highlighting, inlay hints)
+### Plugin Management (lazy.nvim)
+- All plugins lazy-load by default (cmd, keys, ft, event triggers)
+- Exception: Colorscheme and markview.nvim (lazy = false but optimized)
+- Always check existing lazy-loading strategy before modifying plugins
+- Use `ft = { 'filetype' }` for language-specific plugins
 
-**Configured LSP Servers**:
-- gopls (Go) - Full config with inlay hints, analysis, gofumpt
-- vtsls (TypeScript/JavaScript) - Full config with inlay hints, import management
-- solargraph (Ruby)
-- templ (Templ templates)
-- jsonls (JSON with schema validation)
-- html (HTML)
-- emmet_ls (Emmet for HTML/CSS/Templ/React)
-- lua_ls (Lua)
+### LSP Configuration (Neovim 0.11+ API)
+**CRITICAL**: This config uses `vim.lsp.config()` (new 0.11+ API), NOT `lspconfig.setup()`.
 
-### Formatting & Linting
-- **Formatter**: `conform.nvim`
-  - Format on save enabled (500ms timeout, LSP fallback, toggleable with `<leader>tf`)
-  - Configured formatters:
-    - stylua (Lua)
-    - goimports + gofumpt (Go)
-    - templ (templ templates)
-    - prettier/prettierd (TS/JS/JSX/TSX/Markdown)
-  - Keybinding: `<leader>f` to format buffer
-- **Linter**: `nvim-lint` (`lua/kickstart/plugins/lint.lua`)
-  - eslint_d (JS/TS with dynamic config detection)
-  - markdownlint (Markdown)
-  - ruby (Ruby)
+```lua
+-- Correct (new API):
+vim.lsp.config('server_name', {
+  on_attach = on_attach,
+  capabilities = capabilities,
+  settings = { ... }
+})
+vim.lsp.enable('server_name') -- Explicitly enable
 
-### Autocompletion
-- Uses `blink.cmp` (not nvim-cmp) with LuaSnip for snippets (`init.lua:733-832`)
+-- Wrong (old API, will conflict):
+require('lspconfig').server_name.setup { ... }
+```
 
-### Markdown Preview
-- Plugin: `markview.nvim` (`init.lua:1376-1399`)
-- In-buffer markdown rendering with hybrid mode
-- Features:
-  - Hybrid mode: Edit and see preview simultaneously
-  - Splitview: Side-by-side editing and preview
-  - Math rendering: 2000+ LaTeX symbols via KaTeX
-  - GitHub emojis, tables, callouts, checkboxes
-  - Works with blink.cmp for callout/checkbox completion
-- Keybindings:
-  - `<leader>mt` - Toggle preview
-  - `<leader>ms` - Split preview (side-by-side)
-  - `<leader>mh` - Hybrid mode (edit + preview in same buffer)
+**Why**: Neovim 0.11 deprecated lspconfig's `setup()` in favor of built-in `vim.lsp.config()`. Using both causes conflicts.
 
-### Project-Local Configuration
-- Plugin: `nvim-config-local` (`init.lua:948-960`)
-- Looks for `.nvim.lua`, `.nvimrc`, `.exrc` in project directories
-- Use these files for project-specific LSP settings, keymaps, or options
+**LSP Servers Configured** (init.lua:594-668):
+- gopls (Go) - Full config: inlay hints, staticcheck, gofumpt, codelenses
+- vtsls (TypeScript) - Full config: inlay hints, auto-imports, organize imports
+- solargraph (Ruby), templ, jsonls, html, emmet_ls, lua_ls
 
-## Common Development Tasks
+**Common on_attach** (init.lua:499-558):
+- Sets up LSP keymaps (grd, gri, grr, grn, gra, etc.)
+- Enables document highlighting on CursorHold
+- Toggles inlay hints based on user preference
+- Special handling for vtsls (TypeScript import commands)
 
-### Adding a New LSP Server
-1. Add server name to `ensure_installed` table in `init.lua:672-682`
-2. Configure the server using `vim.lsp.config('server_name', { on_attach = on_attach, capabilities = capabilities, ... })` around line 594-668
-3. Restart Neovim or run `:Lazy sync` to install
+### Formatting (conform.nvim)
+- **Format-on-save**: Enabled by default (500ms timeout, LSP fallback)
+- **Toggleable**: `<leader>tf` to disable per-session
+- **Formatter priority**: External formatter → LSP formatter → no-op
+- **Configured formatters** (init.lua:839-847):
+  - stylua (Lua)
+  - goimports + gofumpt (Go) - applied in sequence
+  - templ (templ templates)
+  - prettierd/prettier (TS/JS/JSX/TSX/Markdown) - stop_after_first
 
-### Adding a New Custom Plugin
-1. Create a new file in `lua/custom/plugins/plugin-name.lua`
-2. Return a lazy.nvim plugin spec table (see existing plugins as examples)
-3. Restart Neovim or run `:Lazy sync`
+### Linting (nvim-lint)
+- Location: `lua/kickstart/plugins/lint.lua`
+- Triggers: BufWritePost, InsertLeave (NOT BufEnter, to reduce noise)
+- **eslint_d**: Only runs if config file exists (.eslintrc.js, eslint.config.js, etc.)
+- **markdownlint**: Global config at `~/.markdownlintrc` (relaxed rules)
 
-### Adding a Formatter
-1. Ensure the formatter is installed (add to `mason-tool-installer` if available)
-2. Add filetype mapping in `init.lua:721-729` under `formatters_by_ft`
+### Completion (blink.cmp)
+- **Not nvim-cmp** - uses blink.cmp (faster, async)
+- Snippets: LuaSnip
+- Sources: LSP, path, snippets, buffer
+- Keymaps: `<C-Space>` show, `<C-e>` hide, `<Tab>/<S-Tab>` navigate, `<CR>` accept
 
-### Adding a Linter
+## Workflow-Specific Features
+
+### TypeScript/React/React Native
+- **LSP**: vtsls (not tsserver) with full inlay hints
+- **Import management**: `<leader>co` organize, `<leader>cR` remove unused, `<leader>cI` add missing
+- **Package management**: package-info.nvim (npm version inline display, `<leader>n*` commands)
+- **React Native**: Custom commands `:ExpoStart`, `:ExpoAndroid`, `:ExpoIos`, `:RNLogcat`
+- **Note**: User prefers exact versions without `^` prefix (configure npm: `save-exact=true`)
+
+### Go Development
+- **LSP**: gopls with gofumpt, staticcheck, fieldalignment analysis
+- **Formatters**: goimports (organize imports) + gofumpt (stricter formatting)
+- **Testing**: neotest-go for inline test execution (`<leader>tt`, `<leader>tf`)
+- **Templ templates**: Full support (templ LSP + formatter + emmet)
+
+### Git Workflow
+- **diffview**: Side-by-side diffs (`<leader>gd`), file history (`<leader>gh`)
+- **lazygit**: Terminal integration (`<leader>gg`)
+- **gitsigns**: Hunk management (`<leader>h*` commands)
+
+### Markdown Editing
+- **markview.nvim**: In-buffer rendering with hybrid mode
+- **Modes**: Toggle (`<leader>mt`), split (`<leader>ms`), hybrid (`<leader>mh`)
+- **Features**: LaTeX math, GitHub emojis, tables, callouts, treesitter-based
+- **Note**: Must load after colorscheme (lazy = false)
+
+## Making Changes Safely
+
+### Adding LSP Servers
+1. Add to `ensure_installed` in mason-tool-installer (init.lua:~730)
+2. Configure with `vim.lsp.config('name', { on_attach = on_attach, capabilities = capabilities, ... })`
+3. Call `vim.lsp.enable('name')` to activate
+4. Test with `:LspInfo` and `:checkhealth`
+
+### Adding Plugins
+- **Core plugins**: Add directly to init.lua plugin array (line ~250)
+- **Custom plugins**: Create `lua/custom/plugins/name.lua` (auto-imported)
+- **Always**: Use lazy-loading (cmd, keys, ft, event)
+- **Pattern**: Look at existing plugins for lazy.nvim spec examples
+
+### Adding Formatters
+1. Add to mason-tool-installer `ensure_installed` if available via Mason
+2. Add filetype mapping to `conform.nvim` formatters_by_ft (init.lua:~839)
+3. Test: Open file of that type, run `<leader>f`, check `:ConformInfo`
+
+### Adding Linters
 1. Edit `lua/kickstart/plugins/lint.lua`
-2. Add filetype mapping in the `linters_by_ft` table (line 34-41)
-3. Configure the linter if needed (see eslint_d example for complex cases)
+2. Add to `linters_by_ft` table
+3. Configure linter if needed (see eslint_d example for complex config)
+4. Test: Open file, trigger lint event, check diagnostics
 
-### Managing Plugins
-- `:Lazy` - Open plugin manager UI
-- `:Lazy update` - Update all plugins
-- `:Lazy sync` - Install missing plugins and update existing ones
+### Modifying Keybindings
+- **LSP keymaps**: Defined in on_attach function (init.lua:~499-558)
+- **Plugin keymaps**: Defined in plugin spec's `keys` table (lazy-loaded)
+- **Global keymaps**: Defined after plugin specs (init.lua:~110-220)
+- **Convention**: Use `<leader>` prefix, descriptive names like `[T]est [F]ile`
 
-### LSP Commands
-- `:Mason` - Open Mason UI to manage LSP servers, linters, formatters
-- `:checkhealth` - Diagnose configuration issues
-- `:LspInfo` - Show LSP server status for current buffer
+## Common Patterns
 
-### Testing Configuration Changes
-- For quick testing: `:source %` after editing Lua files
-- For plugin changes: Restart Neovim or `:Lazy reload <plugin-name>`
+### Plugin Spec Structure
+```lua
+{
+  'author/plugin-name',
+  dependencies = { 'required-plugin' },
+  cmd = { 'Command' }, -- Lazy-load on command
+  keys = { -- Lazy-load on keymap
+    { '<leader>xy', '<cmd>Command<cr>', desc = 'Description' }
+  },
+  ft = { 'filetype' }, -- Lazy-load on filetype
+  event = { 'BufReadPost' }, -- Lazy-load on event
+  opts = { ... }, -- Passed to setup() automatically
+  config = function()
+    require('plugin').setup { ... } -- Manual setup
+  end,
+}
+```
 
-## Key Keybindings
+### Adding Language Support
+1. Add treesitter parser to `ensure_installed` (init.lua:~1216)
+2. Add LSP server (see "Adding LSP Servers" above)
+3. Add formatter to conform.nvim
+4. Add linter to nvim-lint (optional)
+5. Add to Mason ensure_installed for auto-install
 
-Leader key: `<Space>`
+## Project Conventions
 
-### LSP Navigation (defined in init.lua:516-524)
-- `grd` - Go to definition
-- `gri` - Go to implementation
-- `grr` - Find references
-- `gO` - Document symbols
-- `gW` - Workspace symbols
-- `grn` - Rename symbol
-- `gra` - Code action
-- `grD` - Go to declaration
+### File Organization
+- Keep init.lua focused on core config
+- Extract complex plugins to `lua/kickstart/plugins/` if sharable
+- Put personal plugins in `lua/custom/plugins/`
+- Document architectural changes in this file
 
-### Search (Telescope, init.lua:431-463)
-- `<leader>sf` - Search files
-- `<leader>sg` - Live grep
-- `<leader>sw` - Search word under cursor
-- `<leader>sd` - Search diagnostics
-- `<leader>sh` - Search help tags
-- `<leader>sn` - Search Neovim config files
+### Commit Messages
+- Use conventional commits: `feat:`, `fix:`, `refactor:`, `docs:`, `chore:`
+- Include `Co-Authored-By: Claude <model> <noreply@anthropic.com>`
+- Keep individual commits focused (one fix per commit preferred)
 
-### TypeScript/JavaScript (vtsls)
-- `<leader>co` - Organize imports
-- `<leader>cR` - Remove unused imports
-- `<leader>cI` - Add missing imports
+### Testing Changes
+- **Quick**: `:source %` for Lua files (doesn't reload plugins)
+- **Plugins**: Restart Neovim or `:Lazy reload <plugin-name>`
+- **LSP**: `:LspRestart` after config changes
+- **Full**: Close and reopen Neovim
 
-### Go Testing (neotest)
-- `<leader>tt` - Run test nearest to cursor
-- `<leader>tf` - Run all tests in file
-- `<leader>tl` - Re-run last test
-- `<leader>ts` - Toggle test summary
-- `<leader>to` - Open test output
-- `<leader>tO` - Toggle test output panel
-- `<leader>tS` - Stop running tests
+### User Preferences
+- No emojis in code/commits (unless explicitly requested)
+- Exact package versions (no `^` prefix in package.json)
+- Minimal, focused changes (avoid over-engineering)
+- Format on save enabled by default
+- Inlay hints enabled for TypeScript and Go
 
-### npm Package Management (package.json only)
-- `<leader>ns` - Show package versions
-- `<leader>nc` - Clear version display
-- `<leader>nt` - Toggle version display
-- `<leader>nu` - Update package under cursor
-- `<leader>nd` - Delete package under cursor
-- `<leader>ni` - Install new package
-- `<leader>np` - Change package version
+## Critical Notes
 
-### Markdown Preview (markview.nvim)
-- `<leader>mt` - Toggle preview
-- `<leader>ms` - Split preview (side-by-side)
-- `<leader>mh` - Hybrid mode (edit + preview in same buffer)
+### Neo-tree Auto-Open
+- Opens automatically on `nvim .` via VimEnter autocmd
+- netrw is disabled globally (`vim.g.loaded_netrw = 1`)
+- Do not re-enable netrw or add `lazy = false` (causes duplicate windows)
 
-### Git (diffview + gitsigns + lazygit)
-- `<leader>gg` - Toggle lazygit
-- `<leader>gd` - Open diff view
-- `<leader>gc` - Close diff view
-- `<leader>gh` - File history (current file)
-- `<leader>gH` - File history (all files)
-- `<leader>gm` - Diff current branch vs main
-- See gitsigns.lua for git hunk keymaps (`<leader>h...`)
+### Package-info Highlights
+- Uses `highlights` option (NOT `colors` - deprecated)
+- Format: `{ up_to_date = { fg = '#hex' } }` (table, not string)
 
-### Toggles
-- `<leader>tf` - Toggle format on save
-- `<leader>td` - Toggle diagnostics
-- `<leader>th` - Toggle inlay hints
-- `<leader>tc` - Toggle treesitter context
-- `<leader>tx` - Toggle treesitter context (alias)
+### Markdownlint Configuration
+- Global config at `~/.markdownlintrc` (relaxed: no line length, blank line rules)
+- Applies to all projects, not just this one
 
-### Buffer & Navigation
-- `[b` / `]b` - Previous/next buffer
-- `<leader>bd` - Delete buffer
-- `<leader>f` - Format buffer
-- `s` - Flash jump
-- `S` - Flash treesitter selection
+### Treesitter Context
+- Shows sticky headers for functions/components at top of window
+- Toggle with `<leader>tc` or `<leader>tx`
+- Useful for long TypeScript/Go files
 
-### React Native / Expo Commands
-- `:ExpoStart` - Start Expo dev server
-- `:ExpoAndroid` - Start on Android
-- `:ExpoIos` - Start on iOS
-- `:ExpoWeb` - Start web version
-- `:RNLogcat` - View Android logs
-- `:RNLog` - View iOS logs
+## External Dependencies
 
-## Important Notes
+**Required**:
+- Neovim 0.11+ (for vim.lsp.config API)
+- Git (for lazy.nvim)
+- Node.js + npm (for TypeScript tooling, package-info)
+- Go (for gopls, goimports, gofumpt)
 
-### Neovim 0.11+ Breaking Changes
-This configuration uses `vim.lsp.config()` which is the **new API in Neovim 0.11**. Do not use `lspconfig.server_name.setup()` as it conflicts with this approach.
+**Optional**:
+- fd (faster file finding for Telescope)
+- ripgrep (faster grep for Telescope)
+- lazygit (git TUI)
+- prettierd (faster prettier formatting)
+- Nerd Font (for icons)
 
-### ESLint Behavior
-The eslint_d linter only runs if it finds a config file (`eslint.config.js`, `eslint.config.mjs`, or `.eslintrc.js`) in the project tree. This prevents false errors in projects without ESLint.
+## Reference Locations
 
-### Filetype Associations
-Custom filetype associations are defined at `init.lua:686-687`:
-- `.templ` → templ
-- `.slim` → slim
+**Key Files**:
+- `init.lua` - Main configuration (~1400 lines)
+- `lua/kickstart/plugins/*.lua` - Modular plugin configs
+- `lua/custom/plugins/*.lua` - User-specific plugins
+- `~/.markdownlintrc` - Global markdown linting config
+
+**Key Line Ranges in init.lua**:
+- Plugin specs: ~250-1400
+- Options: ~110-160
+- Keymaps: ~160-220
+- LSP on_attach: ~499-558
+- LSP servers: ~594-668
+- Mason tool installer: ~720-770
+- Conform formatters: ~839-847
+- Blink.cmp: ~733-832
+- Treesitter: ~1200-1240
+
+## When in Doubt
+
+1. **Read existing code** before suggesting changes
+2. **Preserve lazy-loading** strategies
+3. **Test in isolated way** before committing
+4. **Ask user** if change affects workflow significantly
+5. **Follow Neovim 0.11 API** (vim.lsp.config, not lspconfig.setup)
