@@ -547,6 +547,30 @@ require('lazy').setup({
         map('gW', require('telescope.builtin').lsp_dynamic_workspace_symbols, 'Open Workspace Symbols')
         map('<leader>lr', '<cmd>LspRestart<CR>', 'LSP [R]estart')
 
+        -- TypeScript/JavaScript specific commands
+        if client.name == 'vtsls' then
+          map('<leader>co', function()
+            vim.lsp.buf.execute_command {
+              command = '_typescript.organizeImports',
+              arguments = { vim.api.nvim_buf_get_name(0) },
+            }
+          end, '[C]ode [O]rganize Imports')
+
+          map('<leader>cR', function()
+            vim.lsp.buf.execute_command {
+              command = '_typescript.removeUnused',
+              arguments = { vim.api.nvim_buf_get_name(0) },
+            }
+          end, '[C]ode [R]emove Unused')
+
+          map('<leader>cI', function()
+            vim.lsp.buf.execute_command {
+              command = '_typescript.addMissingImports',
+              arguments = { vim.api.nvim_buf_get_name(0) },
+            }
+          end, '[C]ode Add Missing [I]mports')
+        end
+
         local function client_supports_method(c, method)
           return c.supports_method and c:supports_method(method)
         end
