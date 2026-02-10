@@ -1087,6 +1087,92 @@ require('lazy').setup({
     },
   },
 
+  { -- Test runner with inline results
+    'nvim-neotest/neotest',
+    dependencies = {
+      'nvim-neotest/nvim-nio',
+      'nvim-lua/plenary.nvim',
+      'nvim-treesitter/nvim-treesitter',
+      'nvim-neotest/neotest-go', -- Go test adapter
+    },
+    config = function()
+      require('neotest').setup {
+        adapters = {
+          require('neotest-go') {
+            experimental = {
+              test_table = true,
+            },
+            args = { '-count=1', '-timeout=60s', '-race' },
+          },
+        },
+        quickfix = {
+          enabled = true,
+          open = false,
+        },
+        output = {
+          enabled = true,
+          open_on_run = false,
+        },
+        status = {
+          enabled = true,
+          virtual_text = true,
+          signs = true,
+        },
+      }
+    end,
+    keys = {
+      {
+        '<leader>tt',
+        function()
+          require('neotest').run.run()
+        end,
+        desc = '[T]est [T]est nearest',
+      },
+      {
+        '<leader>tf',
+        function()
+          require('neotest').run.run(vim.fn.expand '%')
+        end,
+        desc = '[T]est [F]ile',
+      },
+      {
+        '<leader>tl',
+        function()
+          require('neotest').run.run_last()
+        end,
+        desc = '[T]est [L]ast',
+      },
+      {
+        '<leader>ts',
+        function()
+          require('neotest').summary.toggle()
+        end,
+        desc = '[T]est [S]ummary',
+      },
+      {
+        '<leader>to',
+        function()
+          require('neotest').output.open { enter = true }
+        end,
+        desc = '[T]est [O]utput',
+      },
+      {
+        '<leader>tO',
+        function()
+          require('neotest').output_panel.toggle()
+        end,
+        desc = '[T]est [O]utput Panel',
+      },
+      {
+        '<leader>tS',
+        function()
+          require('neotest').run.stop()
+        end,
+        desc = '[T]est [S]top',
+      },
+    },
+  },
+
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
