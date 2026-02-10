@@ -1223,6 +1223,25 @@ require('lazy').setup({
     },
   },
 
+  { -- Better git diff viewing
+    'sindrets/diffview.nvim',
+    cmd = { 'DiffviewOpen', 'DiffviewClose', 'DiffviewFileHistory', 'DiffviewToggleFiles' },
+    opts = {
+      enhanced_diff_hl = true,
+      view = {
+        default = { layout = 'diff2_horizontal' },
+        merge_tool = { layout = 'diff3_horizontal' },
+      },
+    },
+    keys = {
+      { '<leader>gd', '<cmd>DiffviewOpen<CR>', desc = '[G]it [D]iff view' },
+      { '<leader>gc', '<cmd>DiffviewClose<CR>', desc = '[G]it diff [C]lose' },
+      { '<leader>gh', '<cmd>DiffviewFileHistory %<CR>', desc = '[G]it [H]istory current file' },
+      { '<leader>gH', '<cmd>DiffviewFileHistory<CR>', desc = '[G]it [H]istory all files' },
+      { '<leader>gm', '<cmd>DiffviewOpen origin/main...HEAD<CR>', desc = '[G]it diff vs [M]ain' },
+    },
+  },
+
   { -- npm/yarn/pnpm package manager
     'vuki656/package-info.nvim',
     dependencies = 'MunifTanjim/nui.nvim',
