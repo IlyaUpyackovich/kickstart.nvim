@@ -14,6 +14,10 @@ return {
     { '\\', ':Neotree reveal<CR>', desc = 'NeoTree reveal', silent = true },
   },
   init = function()
+    -- Disable netrw to prevent conflicts with neo-tree
+    vim.g.loaded_netrw = 1
+    vim.g.loaded_netrwPlugin = 1
+
     -- Auto-open neo-tree when starting with a directory
     vim.api.nvim_create_autocmd('VimEnter', {
       once = true,
@@ -28,7 +32,6 @@ return {
   end,
   opts = {
     filesystem = {
-      hijack_netrw_behavior = 'open_current',
       window = {
         mappings = {
           ['\\'] = 'close_window',
