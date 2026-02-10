@@ -1282,9 +1282,9 @@ require('lazy').setup({
     event = 'BufRead package.json',
     config = function()
       require('package-info').setup {
-        colors = {
-          up_to_date = '#3C4048',
-          outdated = '#d19a66',
+        highlights = {
+          up_to_date = 'Comment', -- Gray for up-to-date packages
+          outdated = 'WarningMsg', -- Orange/warning color for outdated packages
         },
         icons = {
           enable = true,
