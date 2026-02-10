@@ -1,3 +1,5 @@
+-- Set PPID for eslint_d to ensure it uses the correct Neovim instance
+-- This prevents eslint_d from using the wrong daemon when multiple Neovim instances are running
 vim.env.ESLINT_D_PPID = vim.fn.getpid()
 
 return {
