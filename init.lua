@@ -513,8 +513,8 @@ require('lazy').setup({
       'saghen/blink.cmp',
     },
     config = function()
-      -- Эта функция будет вызываться для каждого LSP-сервера при его подключении к буферу.
-      -- Мы перенесли сюда всю логику из твоего старого LspAttach autocommand.
+      -- This function will be called for each LSP server when it attaches to a buffer.
+      -- All logic from the old LspAttach autocommand has been moved here.
       local on_attach = function(client, bufnr)
         local map = function(keys, func, desc, mode)
           mode = mode or 'n'
@@ -547,7 +547,7 @@ require('lazy').setup({
           return c.supports_method and c:supports_method(method)
         end
 
-        -- Подсветка ссылок под курсором
+        -- Highlight references under cursor
         if client_supports_method(client, 'textDocument/documentHighlight') then
           local highlight_augroup = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })
           vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
@@ -569,7 +569,7 @@ require('lazy').setup({
           })
         end
 
-        -- Включение/выключение встроенных подсказок (inlay hints)
+        -- Toggle inlay hints on/off
         if client_supports_method(client, 'textDocument/inlayHint') then
           map('<leader>th', function()
             vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = bufnr })
@@ -577,7 +577,7 @@ require('lazy').setup({
         end
       end
 
-      -- Настройки для диагностики (ошибок, предупреждений) остаются без изменений
+      -- Diagnostic settings (errors, warnings) configuration
       vim.diagnostic.config {
         severity_sort = true,
         float = { border = 'rounded', source = 'if_many' },
@@ -605,11 +605,11 @@ require('lazy').setup({
         },
       }
 
-      -- Получаем capabilities от blink.cmp для автодополнения
+      -- Get capabilities from blink.cmp for autocompletion
       local capabilities = require('blink.cmp').get_lsp_capabilities()
 
-      -- НОВЫЙ СПОСОБ НАСТРОЙКИ СЕРВЕРОВ (Neovim 0.11+ API)
-      -- Мы настраиваем каждый сервер отдельно, передавая ему on_attach и capabilities.
+      -- NEW SERVER CONFIGURATION METHOD (Neovim 0.11+ API)
+      -- Each server is configured separately, passing on_attach and capabilities.
 
       vim.lsp.config('gopls', { on_attach = on_attach, capabilities = capabilities })
       vim.lsp.config('vtsls', { on_attach = on_attach, capabilities = capabilities })
@@ -702,7 +702,7 @@ require('lazy').setup({
       }
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
-      -- Твои кастомные filetype ассоциации остаются здесь
+      -- Custom filetype associations
       vim.filetype.add { extension = { templ = 'templ' } }
       vim.filetype.add { extension = { slim = 'slim' } }
 
