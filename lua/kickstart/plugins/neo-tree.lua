@@ -13,6 +13,19 @@ return {
   keys = {
     { '\\', ':Neotree reveal<CR>', desc = 'NeoTree reveal', silent = true },
   },
+  init = function()
+    -- Auto-open neo-tree when starting with a directory
+    vim.api.nvim_create_autocmd('VimEnter', {
+      once = true,
+      callback = function()
+        local arg = vim.fn.argv(0)
+        local is_dir = arg ~= '' and vim.fn.isdirectory(arg) == 1
+        if is_dir then
+          vim.cmd 'Neotree show'
+        end
+      end,
+    })
+  end,
   opts = {
     filesystem = {
       hijack_netrw_behavior = 'open_current',
