@@ -219,6 +219,11 @@ vim.keymap.set('n', '<leader>tf', function()
   vim.notify('Format on save: ' .. (vim.g.disable_autoformat and 'OFF' or 'ON'))
 end, { desc = '[T]oggle [F]ormat on save' })
 
+vim.keymap.set('n', '<leader>td', function()
+  vim.diagnostic.enable(not vim.diagnostic.is_enabled())
+  vim.notify('Diagnostics: ' .. (vim.diagnostic.is_enabled() and 'ON' or 'OFF'))
+end, { desc = '[T]oggle [D]iagnostics' })
+
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
