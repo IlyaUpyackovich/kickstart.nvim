@@ -48,6 +48,20 @@ This config uses the **new Neovim 0.11+ LSP API** (`vim.lsp.config`) instead of 
 ### Autocompletion
 - Uses `blink.cmp` (not nvim-cmp) with LuaSnip for snippets (`init.lua:733-832`)
 
+### Markdown Preview
+- Plugin: `markview.nvim` (`init.lua:1376-1399`)
+- In-buffer markdown rendering with hybrid mode
+- Features:
+  - Hybrid mode: Edit and see preview simultaneously
+  - Splitview: Side-by-side editing and preview
+  - Math rendering: 2000+ LaTeX symbols via KaTeX
+  - GitHub emojis, tables, callouts, checkboxes
+  - Works with blink.cmp for callout/checkbox completion
+- Keybindings:
+  - `<leader>mt` - Toggle preview
+  - `<leader>ms` - Split preview (side-by-side)
+  - `<leader>mh` - Hybrid mode (edit + preview in same buffer)
+
 ### Project-Local Configuration
 - Plugin: `nvim-config-local` (`init.lua:948-960`)
 - Looks for `.nvim.lua`, `.nvimrc`, `.exrc` in project directories
@@ -132,6 +146,11 @@ Leader key: `<Space>`
 - `<leader>nd` - Delete package under cursor
 - `<leader>ni` - Install new package
 - `<leader>np` - Change package version
+
+### Markdown Preview (markview.nvim)
+- `<leader>mt` - Toggle preview
+- `<leader>ms` - Split preview (side-by-side)
+- `<leader>mh` - Hybrid mode (edit + preview in same buffer)
 
 ### Git (diffview + gitsigns + lazygit)
 - `<leader>gg` - Toggle lazygit

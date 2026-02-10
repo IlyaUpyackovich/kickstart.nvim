@@ -1373,6 +1373,31 @@ require('lazy').setup({
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   { import = 'custom.plugins' },
 
+  { -- Markdown preview with in-buffer rendering
+    'OXY2DEV/markview.nvim',
+    lazy = false, -- Must not be lazy-loaded (plugin is internally optimized)
+    ft = { 'markdown' }, -- Only load for markdown files
+    dependencies = {
+      'nvim-treesitter/nvim-treesitter',
+      'saghen/blink.cmp', -- For callout/checkbox completion
+    },
+    opts = {
+      modes = { 'n', 'no', 'c' }, -- Show preview in normal, operator-pending, command modes
+      hybrid_modes = { 'n' }, -- Enable hybrid mode (edit + preview) in normal mode
+      callbacks = {
+        on_enable = function(_, win)
+          vim.wo[win].conceallevel = 2
+          vim.wo[win].concealcursor = 'nc'
+        end,
+      },
+    },
+    keys = {
+      { '<leader>mt', '<cmd>Markview toggle<cr>', desc = '[M]arkdown [T]oggle preview' },
+      { '<leader>ms', '<cmd>Markview splitToggle<cr>', desc = '[M]arkdown [S]plit preview' },
+      { '<leader>mh', '<cmd>Markview hybridToggle<cr>', desc = '[M]arkdown [H]ybrid mode' },
+    },
+  },
+
   {
     'klen/nvim-config-local',
     config = function()
