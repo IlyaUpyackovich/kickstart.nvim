@@ -229,6 +229,31 @@ vim.keymap.set('n', '<leader>td', function()
   vim.notify('Diagnostics: ' .. (vim.diagnostic.is_enabled() and 'ON' or 'OFF'))
 end, { desc = '[T]oggle [D]iagnostics' })
 
+-- React Native / Expo commands
+vim.api.nvim_create_user_command('ExpoStart', function()
+  vim.cmd 'TermExec cmd="npx expo start"'
+end, { desc = 'Start Expo dev server' })
+
+vim.api.nvim_create_user_command('ExpoAndroid', function()
+  vim.cmd 'TermExec cmd="npx expo start --android"'
+end, { desc = 'Start Expo on Android' })
+
+vim.api.nvim_create_user_command('ExpoIos', function()
+  vim.cmd 'TermExec cmd="npx expo start --ios"'
+end, { desc = 'Start Expo on iOS' })
+
+vim.api.nvim_create_user_command('ExpoWeb', function()
+  vim.cmd 'TermExec cmd="npx expo start --web"'
+end, { desc = 'Start Expo on Web' })
+
+vim.api.nvim_create_user_command('RNLogcat', function()
+  vim.cmd 'TermExec cmd="npx react-native log-android"'
+end, { desc = 'Show React Native Android logs' })
+
+vim.api.nvim_create_user_command('RNLog', function()
+  vim.cmd 'TermExec cmd="npx react-native log-ios"'
+end, { desc = 'Show React Native iOS logs' })
+
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
@@ -818,6 +843,15 @@ require('lazy').setup({
       -- Custom filetype associations
       vim.filetype.add { extension = { templ = 'templ' } }
       vim.filetype.add { extension = { slim = 'slim' } }
+      vim.filetype.add { extension = { mdx = 'mdx' } } -- React Native docs
+      vim.filetype.add {
+        pattern = {
+          ['.*%.config%.js'] = 'javascript', -- Expo/Metro configs
+          ['.*%.config%.ts'] = 'typescript',
+          ['metro%.config%.js'] = 'javascript',
+          ['app%.json'] = 'jsonc', -- Allow comments in Expo app.json
+        },
+      }
 
       -- Enable all configured LSP servers to auto-start
       -- With Neovim 0.11+ vim.lsp.config(), explicit enable is needed for auto-start
