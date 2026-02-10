@@ -15,7 +15,7 @@ return {
           return nil
         end
         local start_path = vim.fs.dirname(current_file_path)
-        local config_files = vim.fs.find({ 'eslint.config.js', 'eslint.config.mjs' }, {
+        local config_files = vim.fs.find({ 'eslint.config.js', 'eslint.config.mjs', '.eslintrc.js' }, {
           upward = true,
           stop = vim.loop.os_homedir(),
           path = start_path,
@@ -42,7 +42,7 @@ return {
 
       -- Создаем автокоманду для запуска линтинга
       local lint_augroup = vim.api.nvim_create_augroup('lint', { clear = true })
-      vim.api.nvim_create_autocmd({ 'BufEnter', 'BufWritePost', 'InsertLeave' }, {
+      vim.api.nvim_create_autocmd({ 'BufWritePost', 'InsertLeave' }, {
         group = lint_augroup,
         callback = function(args)
           -- Выполняем только для изменяемых буферов
