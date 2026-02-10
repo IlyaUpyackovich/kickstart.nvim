@@ -22,8 +22,8 @@ This config uses the **new Neovim 0.11+ LSP API** (`vim.lsp.config`) instead of 
 - Common on_attach logic: `init.lua:499-558` (sets up keymaps, document highlighting, inlay hints)
 
 **Configured LSP Servers**:
-- gopls (Go)
-- vtsls (TypeScript/JavaScript)
+- gopls (Go) - Full config with inlay hints, analysis, gofumpt
+- vtsls (TypeScript/JavaScript) - Full config with inlay hints, import management
 - solargraph (Ruby)
 - templ (Templ templates)
 - jsonls (JSON with schema validation)
@@ -32,9 +32,13 @@ This config uses the **new Neovim 0.11+ LSP API** (`vim.lsp.config`) instead of 
 - lua_ls (Lua)
 
 ### Formatting & Linting
-- **Formatter**: `conform.nvim` (`init.lua:692-731`)
-  - Format on save enabled (500ms timeout, LSP fallback)
-  - Configured formatters: stylua (Lua), prettier/prettierd (TS/JS/JSX/TSX/Markdown)
+- **Formatter**: `conform.nvim`
+  - Format on save enabled (500ms timeout, LSP fallback, toggleable with `<leader>tf`)
+  - Configured formatters:
+    - stylua (Lua)
+    - goimports + gofumpt (Go)
+    - templ (templ templates)
+    - prettier/prettierd (TS/JS/JSX/TSX/Markdown)
   - Keybinding: `<leader>f` to format buffer
 - **Linter**: `nvim-lint` (`lua/kickstart/plugins/lint.lua`)
   - eslint_d (JS/TS with dynamic config detection)
@@ -106,10 +110,59 @@ Leader key: `<Space>`
 - `<leader>sh` - Search help tags
 - `<leader>sn` - Search Neovim config files
 
-### Custom Features
-- `<leader>gg` - Toggle lazygit (toggleterm plugin)
-- `<leader>f` - Format buffer
+### TypeScript/JavaScript (vtsls)
+- `<leader>co` - Organize imports
+- `<leader>cR` - Remove unused imports
+- `<leader>cI` - Add missing imports
+
+### Go Testing (neotest)
+- `<leader>tt` - Run test nearest to cursor
+- `<leader>tf` - Run all tests in file
+- `<leader>tl` - Re-run last test
+- `<leader>ts` - Toggle test summary
+- `<leader>to` - Open test output
+- `<leader>tO` - Toggle test output panel
+- `<leader>tS` - Stop running tests
+
+### npm Package Management (package.json only)
+- `<leader>ns` - Show package versions
+- `<leader>nc` - Clear version display
+- `<leader>nt` - Toggle version display
+- `<leader>nu` - Update package under cursor
+- `<leader>nd` - Delete package under cursor
+- `<leader>ni` - Install new package
+- `<leader>np` - Change package version
+
+### Git (diffview + gitsigns + lazygit)
+- `<leader>gg` - Toggle lazygit
+- `<leader>gd` - Open diff view
+- `<leader>gc` - Close diff view
+- `<leader>gh` - File history (current file)
+- `<leader>gH` - File history (all files)
+- `<leader>gm` - Diff current branch vs main
+- See gitsigns.lua for git hunk keymaps (`<leader>h...`)
+
+### Toggles
+- `<leader>tf` - Toggle format on save
+- `<leader>td` - Toggle diagnostics
 - `<leader>th` - Toggle inlay hints
+- `<leader>tc` - Toggle treesitter context
+- `<leader>tx` - Toggle treesitter context (alias)
+
+### Buffer & Navigation
+- `[b` / `]b` - Previous/next buffer
+- `<leader>bd` - Delete buffer
+- `<leader>f` - Format buffer
+- `s` - Flash jump
+- `S` - Flash treesitter selection
+
+### React Native / Expo Commands
+- `:ExpoStart` - Start Expo dev server
+- `:ExpoAndroid` - Start on Android
+- `:ExpoIos` - Start on iOS
+- `:ExpoWeb` - Start web version
+- `:RNLogcat` - View Android logs
+- `:RNLog` - View iOS logs
 
 ## Important Notes
 
