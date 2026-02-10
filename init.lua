@@ -615,7 +615,46 @@ require('lazy').setup({
       -- NEW SERVER CONFIGURATION METHOD (Neovim 0.11+ API)
       -- Each server is configured separately, passing on_attach and capabilities.
 
-      vim.lsp.config('gopls', { on_attach = on_attach, capabilities = capabilities })
+      vim.lsp.config('gopls', {
+        on_attach = on_attach,
+        capabilities = capabilities,
+        settings = {
+          gopls = {
+            gofumpt = true, -- Stricter formatting than gofmt
+            codelenses = {
+              gc_details = false,
+              generate = true,
+              regenerate_cgo = true,
+              run_govulncheck = true,
+              test = true,
+              tidy = true,
+              upgrade_dependency = true,
+              vendor = true,
+            },
+            hints = {
+              assignVariableTypes = true,
+              compositeLiteralFields = true,
+              compositeLiteralTypes = true,
+              constantValues = true,
+              functionTypeParameters = true,
+              parameterNames = true,
+              rangeVariableTypes = true,
+            },
+            analyses = {
+              fieldalignment = true,
+              nilness = true,
+              unusedparams = true,
+              unusedwrite = true,
+              useany = true,
+            },
+            usePlaceholders = true,
+            completeUnimported = true,
+            staticcheck = true,
+            directoryFilters = { '-.git', '-.vscode', '-.idea', '-.vscode-test', '-node_modules' },
+            semanticTokens = true,
+          },
+        },
+      })
       vim.lsp.config('vtsls', { on_attach = on_attach, capabilities = capabilities })
       vim.lsp.config('solargraph', {
         on_attach = on_attach,
