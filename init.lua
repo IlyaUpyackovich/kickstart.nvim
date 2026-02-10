@@ -541,6 +541,7 @@ require('lazy').setup({
         map('gra', vim.lsp.buf.code_action, '[G]oto Code [A]ction', { 'n', 'x' })
         map('grD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
         map('gW', require('telescope.builtin').lsp_dynamic_workspace_symbols, 'Open Workspace Symbols')
+        map('<leader>lr', '<cmd>LspRestart<CR>', 'LSP [R]estart')
 
         local function client_supports_method(c, method)
           return c.supports_method and c:supports_method(method)
