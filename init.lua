@@ -213,6 +213,11 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 
 vim.keymap.set('n', '<leader>tn', ':tabnew<CR>', { desc = '[T]ab [N]ew' })
 
+-- Buffer navigation
+vim.keymap.set('n', '[b', '<cmd>bprevious<CR>', { desc = 'Previous buffer' })
+vim.keymap.set('n', ']b', '<cmd>bnext<CR>', { desc = 'Next buffer' })
+vim.keymap.set('n', '<leader>bd', '<cmd>bdelete<CR>', { desc = '[B]uffer [D]elete' })
+
 -- Toggle keymaps
 vim.keymap.set('n', '<leader>tf', function()
   vim.g.disable_autoformat = not vim.g.disable_autoformat
