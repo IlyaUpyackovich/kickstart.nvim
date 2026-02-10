@@ -100,6 +100,17 @@ require('lspconfig').server_name.setup { ... }
 - **Features**: LaTeX math, GitHub emojis, tables, callouts, treesitter-based
 - **Note**: Must load after colorscheme (lazy = false)
 
+### Terminal Management
+- **Plugin**: toggleterm.nvim (lua/custom/plugins/toggleterm.lua)
+- **Persistent terminals**: Survive closing/navigation (close_on_exit = false)
+- **Claude Code CLI**: Dedicated terminal with session persistence (`<leader>cc`)
+- **General terminals**: Horizontal (`<leader>ct`), vertical (`<leader>cv`), float (`<leader>cf`)
+- **Quick toggle**: `Ctrl-\` toggles last terminal
+- **Navigation**: `Esc` exits insert mode, `Ctrl+h/j/k/l` moves between windows
+- **Multiple terminals**: Use `:1ToggleTerm`, `:2ToggleTerm`, etc. for numbered terminals
+- **Lazygit integration**: `<leader>gg` opens lazygit in floating terminal
+- **Why better than `:te`**: Terminals stay alive, easy toggle, no lost buffers
+
 ## Making Changes Safely
 
 ### Adding LSP Servers

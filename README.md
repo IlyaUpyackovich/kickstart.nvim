@@ -204,6 +204,50 @@ npm config set save-exact true
 - Emoji shortcodes: `:rocket:` → 🚀
 - Tables, checkboxes, code blocks with syntax highlighting
 
+### Terminal Management
+
+**toggleterm.nvim** provides persistent terminal sessions that survive navigation:
+
+**Quick Access**:
+- `Ctrl-\` - Toggle last terminal
+- `Space` + `c` + `c` - Claude Code (persistent session)
+- `Space` + `c` + `t` - Horizontal terminal
+- `Space` + `c` + `v` - Vertical terminal
+- `Space` + `c` + `f` - Floating terminal
+
+**Claude Code CLI Integration**:
+- Opens in vertical split (40% width)
+- Session persists when hidden - no lost context!
+- Auto-starts in project folder
+- Toggle visibility without losing your conversation
+
+**Multiple Terminals**:
+```vim
+:1ToggleTerm  " Terminal #1
+:2ToggleTerm  " Terminal #2
+:3ToggleTerm  " Terminal #3
+```
+
+**Terminal Navigation**:
+- `Esc` - Exit insert mode (in terminal)
+- `Ctrl+h/j/k/l` - Jump to other windows
+
+**Workflow Example**:
+```
+1. Open project: nvim .
+2. Start Claude: <leader>cc
+3. Ask Claude to help with code
+4. Hide Claude: <leader>cc (session stays alive!)
+5. Edit files based on suggestions
+6. Show Claude: <leader>cc (full history intact!)
+```
+
+**Why better than `:terminal`**:
+- Terminals stay alive when you navigate
+- Easy toggle by ID - no lost buffers
+- Claude sessions persist between hide/show
+- Numbered terminals for organized workflows
+
 ### Git Workflows
 
 **Visual Diffs**:
@@ -513,6 +557,17 @@ Installs new plugins, removes deleted ones.
 | `<leader>mt` | Toggle preview |
 | `<leader>ms` | Split preview |
 | `<leader>mh` | Hybrid mode |
+
+### Terminal
+| Key | Action |
+|-----|--------|
+| `Ctrl-\` | Toggle last terminal |
+| `<leader>cc` | Claude Code (persistent) |
+| `<leader>ct` | Horizontal terminal |
+| `<leader>cv` | Vertical terminal |
+| `<leader>cf` | Floating terminal |
+| `Esc` (in term) | Exit insert mode |
+| `Ctrl+h/j/k/l` (in term) | Navigate windows |
 
 ### Git
 | Key | Action |
