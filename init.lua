@@ -739,7 +739,7 @@ require('lazy').setup({
 
   { -- Autocompletion
     'saghen/blink.cmp',
-    event = 'VimEnter',
+    event = 'InsertEnter',
     version = '1.*',
     dependencies = {
       -- Snippet Engine
