@@ -103,13 +103,23 @@ require('lspconfig').server_name.setup { ... }
 ### Terminal Management
 - **Plugin**: toggleterm.nvim (lua/custom/plugins/toggleterm.lua)
 - **Persistent terminals**: Survive closing/navigation (close_on_exit = false)
-- **Claude Code CLI**: Dedicated terminal with session persistence (`<leader>cc`)
+- **Claude Code CLI**: `<leader>cc` opens Claude in tmux window (falls back to toggleterm outside tmux)
 - **General terminals**: Horizontal (`<leader>ct`), vertical (`<leader>cv`), float (`<leader>cf`)
 - **Quick toggle**: `Ctrl-\` toggles last terminal
-- **Navigation**: `Esc` exits insert mode, `Ctrl+h/j/k/l` moves between windows
+- **Navigation**: `Esc` exits insert mode in terminal buffers
 - **Multiple terminals**: Use `:1ToggleTerm`, `:2ToggleTerm`, etc. for numbered terminals
 - **Lazygit integration**: `<leader>gg` opens lazygit in floating terminal
-- **Why better than `:te`**: Terminals stay alive, easy toggle, no lost buffers
+
+### tmux Integration
+- **Config**: `~/.tmux.conf` (prefix: `Ctrl-a`, escape-time 10ms, true colors)
+- **Navigation**: vim-tmux-navigator — `Ctrl+h/j/k/l` works seamlessly across Neovim windows and tmux panes
+- **Claude Code workflow**: `tdev` in project dir → `nvim .` → `<leader>cc` opens Claude in a separate tmux window
+- **Session picker**: `Ctrl-f` (shell) or `prefix + f` (tmux) — fuzzy-find project, auto-create/switch session
+- **Session persistence**: tmux-resurrect + tmux-continuum — auto-saves sessions, survives tmux restarts
+- **Reload config**: `prefix + r` reloads `~/.tmux.conf`
+- **Status bar**: Minimal tokyonight-themed
+- **Plugin manager**: TPM (`~/.tmux/plugins/tpm`) — run `prefix + I` to install plugins
+- **Helper**: `tdev [name]` — creates/attaches to tmux session (defaults to current directory name)
 
 ## Making Changes Safely
 
@@ -224,6 +234,7 @@ require('lspconfig').server_name.setup { ... }
 - Go (for gopls, goimports, gofumpt)
 
 **Optional**:
+- tmux 3.5+ (for Claude Code integration, `brew install tmux`)
 - fd (faster file finding for Telescope)
 - ripgrep (faster grep for Telescope)
 - lazygit (git TUI)
@@ -235,6 +246,7 @@ require('lspconfig').server_name.setup { ... }
 **Key Files**:
 - `init.lua` - Main configuration (~1400 lines)
 - `lua/kickstart/plugins/*.lua` - Modular plugin configs
+- `~/.tmux.conf` - tmux configuration (vim-tmux-navigator, true colors)
 - `lua/custom/plugins/*.lua` - User-specific plugins
 - `~/.markdownlintrc` - Global markdown linting config
 
