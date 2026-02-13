@@ -27,6 +27,10 @@ return {
           width = 120,
           height = 30,
         },
+        on_open = function(term)
+          -- Esc exits terminal insert mode for generic terminals
+          vim.keymap.set('t', '<esc>', [[<C-\><C-n>]], { buffer = term.bufnr })
+        end,
       }
 
       local Terminal = require('toggleterm.terminal').Terminal
@@ -49,6 +53,7 @@ return {
         },
         on_open = function(term)
           vim.cmd 'startinsert!'
+          -- Don't map Esc here — lazygit needs it for cancel/return
         end,
       }
 
@@ -56,20 +61,44 @@ return {
         lazygit_terminal:toggle()
       end
 
-      -- Claude Code terminal (new - persistent session)
-      local claude = Terminal:new {
+      -- Claude Code: tmux split pane (preferred) or toggleterm fallback
+      local claude_toggleterm = Terminal:new {
         cmd = 'claude',
         direction = 'vertical',
-        close_on_exit = false, -- Session persists when hidden
+        close_on_exit = false,
         hidden = true,
         on_open = function(term)
           vim.cmd 'startinsert!'
+          vim.api.nvim_buf_set_keymap(term.bufnr, 't', '<esc>', [[<C-\><C-n>]], { noremap = true, silent = true })
           vim.api.nvim_buf_set_keymap(term.bufnr, 'n', 'q', '<cmd>close<CR>', { noremap = true, silent = true })
         end,
       }
 
+      local claude_pane_id = nil
+
       function _claude_toggle()
-        claude:toggle()
+        if vim.env.TMUX then
+          if claude_pane_id then
+            -- Check if pane is alive (direct exec, no shell)
+            local check = vim.system({ 'tmux', 'display-message', '-p', '-t', claude_pane_id, '#{window_id}' }):wait()
+            if check.code == 0 then
+              local pane_win = vim.trim(check.stdout)
+              local cur_win = vim.trim(vim.system({ 'tmux', 'display-message', '-p', '#{window_id}' }):wait().stdout)
+              if pane_win == cur_win then
+                vim.system { 'tmux', 'break-pane', '-d', '-s', claude_pane_id }
+              else
+                vim.system { 'tmux', 'join-pane', '-h', '-l', '50%', '-s', claude_pane_id }
+              end
+              return
+            end
+            claude_pane_id = nil
+          end
+          local result = vim.system({ 'tmux', 'split-window', '-h', '-l', '50%', '-P', '-F', '#{pane_id}', 'claude' }):wait()
+          claude_pane_id = vim.trim(result.stdout)
+        else
+          -- Not in tmux: fall back to toggleterm
+          claude_toggleterm:toggle()
+        end
       end
 
       -- Keybindings
@@ -102,18 +131,6 @@ return {
         silent = true,
         desc = '[C]ode [F]loating terminal',
       })
-
-      -- Easy terminal navigation
-      function _G.set_terminal_keymaps()
-        local opts = { buffer = 0 }
-        vim.keymap.set('t', '<esc>', [[<C-\><C-n>]], opts) -- Esc to exit insert mode
-        vim.keymap.set('t', '<C-h>', [[<Cmd>wincmd h<CR>]], opts)
-        vim.keymap.set('t', '<C-j>', [[<Cmd>wincmd j<CR>]], opts)
-        vim.keymap.set('t', '<C-k>', [[<Cmd>wincmd k<CR>]], opts)
-        vim.keymap.set('t', '<C-l>', [[<Cmd>wincmd l<CR>]], opts)
-      end
-
-      vim.cmd 'autocmd! TermOpen term://* lua set_terminal_keymaps()'
     end,
   },
 }
