@@ -196,14 +196,8 @@ vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' }
 -- vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
 -- vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
 
--- Keybinds to make split navigation easier.
---  Use CTRL+<hjkl> to switch between windows
---
---  See `:help wincmd` for a list of all window commands
-vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
-vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
-vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
-vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+-- Ctrl+h/j/k/l navigation handled by vim-tmux-navigator plugin
+-- (works across both Neovim windows and tmux panes)
 
 -- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
 -- vim.keymap.set("n", "<C-S-h>", "<C-w>H", { desc = "Move window to the left" })
@@ -295,6 +289,17 @@ require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
   'editorconfig/editorconfig-vim', -- EditorConfig support for consistent coding styles
+
+  { -- Seamless navigation between tmux panes and Neovim windows
+    'christoomey/vim-tmux-navigator',
+    cmd = { 'TmuxNavigateLeft', 'TmuxNavigateDown', 'TmuxNavigateUp', 'TmuxNavigateRight' },
+    keys = {
+      { '<C-h>', '<cmd>TmuxNavigateLeft<cr>' },
+      { '<C-j>', '<cmd>TmuxNavigateDown<cr>' },
+      { '<C-k>', '<cmd>TmuxNavigateUp<cr>' },
+      { '<C-l>', '<cmd>TmuxNavigateRight<cr>' },
+    },
+  },
 
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
@@ -1134,7 +1139,7 @@ require('lazy').setup({
     config = function()
       require('neotest').setup {
         adapters = {
-          require('neotest-go') {
+          require 'neotest-go' {
             experimental = {
               test_table = true,
             },
