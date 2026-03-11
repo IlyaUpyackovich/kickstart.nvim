@@ -103,7 +103,7 @@ require('lspconfig').server_name.setup { ... }
 ### Terminal Management
 - **Plugin**: toggleterm.nvim (lua/custom/plugins/toggleterm.lua)
 - **Persistent terminals**: Survive closing/navigation (close_on_exit = false)
-- **Claude Code CLI**: `<leader>cc` opens Claude in tmux window (falls back to toggleterm outside tmux)
+- **Claude Code CLI**: `<leader>cc` opens Claude in a tmux window (full screen), `<leader>cC` opens a new session
 - **General terminals**: Horizontal (`<leader>ct`), vertical (`<leader>cv`), float (`<leader>cf`)
 - **Quick toggle**: `Ctrl-\` toggles last terminal
 - **Navigation**: `Esc` exits insert mode in terminal buffers
@@ -113,7 +113,7 @@ require('lspconfig').server_name.setup { ... }
 ### tmux Integration
 - **Config**: `~/.tmux.conf` (prefix: `Ctrl-a`, escape-time 10ms, true colors)
 - **Navigation**: vim-tmux-navigator — `Ctrl+h/j/k/l` works seamlessly across Neovim windows and tmux panes
-- **Claude Code workflow**: `tdev` in project dir → `nvim .` → `<leader>cc` opens Claude in a separate tmux window
+- **Claude Code workflow**: `tdev` in project dir → `nvim .` → `<leader>cc` opens Claude in a separate tmux window, `Ctrl-a + p` to go back
 - **Session picker**: `Ctrl-f` (shell) or `prefix + f` (tmux) — fuzzy-find project, auto-create/switch session
 - **Session persistence**: tmux-resurrect + tmux-continuum — auto-saves sessions, survives tmux restarts
 - **Reload config**: `prefix + r` reloads `~/.tmux.conf`

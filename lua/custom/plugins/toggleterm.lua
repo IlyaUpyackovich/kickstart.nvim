@@ -61,57 +61,41 @@ return {
         lazygit_terminal:toggle()
       end
 
-      -- Claude Code: tmux split pane (preferred) or toggleterm fallback
-      local function make_claude_toggle(cmd)
-        local term = Terminal:new {
-          cmd = cmd,
-          direction = 'vertical',
-          close_on_exit = false,
-          hidden = true,
-          on_open = function(t)
-            vim.cmd 'startinsert!'
-            vim.api.nvim_buf_set_keymap(t.bufnr, 't', '<esc>', [[<C-\><C-n>]], { noremap = true, silent = true })
-            vim.api.nvim_buf_set_keymap(t.bufnr, 'n', 'q', '<cmd>close<CR>', { noremap = true, silent = true })
-          end,
-        }
-        local pane_id = nil
+      -- Claude Code: tmux window (requires tmux)
+      local claude_cmd = 'claude --dangerously-skip-permissions'
+      local claude_win_id = nil
 
-        local function tmux_pane_exists(id)
-          if not id or id == '' then
-            return false
-          end
-          return vim.system({ 'tmux', 'display-message', '-p', '-t', id, '#{pane_id}' }):wait().code == 0
+      local function tmux_window_exists(id)
+        if not id then
+          return false
         end
+        return vim.system({ 'tmux', 'display-message', '-p', '-t', id, '#{window_id}' }):wait().code == 0
+      end
 
-        return function()
-          if vim.env.TMUX then
-            if tmux_pane_exists(pane_id) then
-              local check = vim.system({ 'tmux', 'display-message', '-p', '-t', pane_id, '#{window_id}' }):wait()
-              local pane_win = vim.trim(check.stdout)
-              local cur_win = vim.trim(vim.system({ 'tmux', 'display-message', '-p', '#{window_id}' }):wait().stdout)
-              if pane_win == cur_win then
-                vim.system { 'tmux', 'break-pane', '-d', '-s', pane_id }
-              else
-                vim.system { 'tmux', 'join-pane', '-h', '-l', '50%', '-s', pane_id }
-              end
-              return
-            end
-            pane_id = nil
-            local result = vim.system({ 'tmux', 'split-window', '-h', '-l', '50%', '-P', '-F', '#{pane_id}', cmd }):wait()
-            if result.code == 0 then
-              local id = vim.trim(result.stdout)
-              if id ~= '' then
-                pane_id = id
-              end
-            end
-          else
-            term:toggle()
+      -- Switch to existing Claude window, or create one
+      local function claude_toggle()
+        if not vim.env.TMUX then
+          vim.notify('Claude Code requires tmux', vim.log.levels.WARN)
+          return
+        end
+        if tmux_window_exists(claude_win_id) then
+          vim.system { 'tmux', 'select-window', '-t', claude_win_id }
+        else
+          local result = vim.system({ 'tmux', 'new-window', '-P', '-F', '#{window_id}', '-n', 'claude', claude_cmd }):wait()
+          if result.code == 0 then
+            claude_win_id = vim.trim(result.stdout)
           end
         end
       end
 
-      local claude_toggle = make_claude_toggle 'claude'
-      local claude_yolo_toggle = make_claude_toggle 'claude --dangerously-skip-permissions'
+      -- Always open a new Claude session
+      local function claude_new()
+        if not vim.env.TMUX then
+          vim.notify('Claude Code requires tmux', vim.log.levels.WARN)
+          return
+        end
+        vim.system { 'tmux', 'new-window', '-n', 'claude', claude_cmd }
+      end
 
       -- Keybindings
       vim.keymap.set('n', '<leader>gg', '<cmd>lua _lazygit_toggle()<CR>', {
@@ -124,8 +108,8 @@ return {
         desc = '[C]laude [C]ode',
       })
 
-      vim.keymap.set('n', '<leader>cC', claude_yolo_toggle, {
-        desc = '[C]laude [C]ode (skip permissions)',
+      vim.keymap.set('n', '<leader>cC', claude_new, {
+        desc = '[C]laude [C]ode (new session)',
       })
 
       vim.keymap.set('n', '<leader>ct', '<cmd>ToggleTerm direction=horizontal<CR>', {
