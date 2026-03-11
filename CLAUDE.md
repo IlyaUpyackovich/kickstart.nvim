@@ -103,7 +103,7 @@ require('lspconfig').server_name.setup { ... }
 ### Terminal Management
 - **Plugin**: toggleterm.nvim (lua/custom/plugins/toggleterm.lua)
 - **Persistent terminals**: Survive closing/navigation (close_on_exit = false)
-- **Claude Code CLI**: `<leader>cc` opens Claude in a tmux window (full screen), `<leader>cC` opens a new session
+- **Claude Code CLI**: `<leader>cc` opens a new Claude session in a tmux window (full screen, skip permissions)
 - **General terminals**: Horizontal (`<leader>ct`), vertical (`<leader>cv`), float (`<leader>cf`)
 - **Quick toggle**: `Ctrl-\` toggles last terminal
 - **Navigation**: `Esc` exits insert mode in terminal buffers

@@ -61,40 +61,13 @@ return {
         lazygit_terminal:toggle()
       end
 
-      -- Claude Code: tmux window (requires tmux)
-      local claude_cmd = 'claude --dangerously-skip-permissions'
-      local claude_win_id = nil
-
-      local function tmux_window_exists(id)
-        if not id then
-          return false
-        end
-        return vim.system({ 'tmux', 'display-message', '-p', '-t', id, '#{window_id}' }):wait().code == 0
-      end
-
-      -- Switch to existing Claude window, or create one
-      local function claude_toggle()
+      -- Claude Code: always open new session in tmux window
+      local function claude_open()
         if not vim.env.TMUX then
           vim.notify('Claude Code requires tmux', vim.log.levels.WARN)
           return
         end
-        if tmux_window_exists(claude_win_id) then
-          vim.system { 'tmux', 'select-window', '-t', claude_win_id }
-        else
-          local result = vim.system({ 'tmux', 'new-window', '-P', '-F', '#{window_id}', '-n', 'claude', claude_cmd }):wait()
-          if result.code == 0 then
-            claude_win_id = vim.trim(result.stdout)
-          end
-        end
-      end
-
-      -- Always open a new Claude session
-      local function claude_new()
-        if not vim.env.TMUX then
-          vim.notify('Claude Code requires tmux', vim.log.levels.WARN)
-          return
-        end
-        vim.system { 'tmux', 'new-window', '-n', 'claude', claude_cmd }
+        vim.system { 'tmux', 'new-window', '-n', 'claude', 'claude --dangerously-skip-permissions' }
       end
 
       -- Keybindings
@@ -104,12 +77,8 @@ return {
         desc = '[G]it [G]it (lazygit)',
       })
 
-      vim.keymap.set('n', '<leader>cc', claude_toggle, {
+      vim.keymap.set('n', '<leader>cc', claude_open, {
         desc = '[C]laude [C]ode',
-      })
-
-      vim.keymap.set('n', '<leader>cC', claude_new, {
-        desc = '[C]laude [C]ode (new session)',
       })
 
       vim.keymap.set('n', '<leader>ct', '<cmd>ToggleTerm direction=horizontal<CR>', {
