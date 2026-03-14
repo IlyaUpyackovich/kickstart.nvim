@@ -1238,6 +1238,7 @@ require('lazy').setup({
         'vimdoc',
         'templ', -- Templ templates
         'slim', -- Slim templates
+        'mermaid', -- Mermaid diagrams
       },
       -- Autoinstall languages that are not installed
       auto_install = true,
