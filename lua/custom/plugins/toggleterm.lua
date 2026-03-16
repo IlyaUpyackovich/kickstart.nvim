@@ -77,8 +77,21 @@ return {
         desc = '[G]it [G]it (lazygit)',
       })
 
+      -- Codex: open new session in tmux window
+      local function codex_open()
+        if not vim.env.TMUX then
+          vim.notify('Codex requires tmux', vim.log.levels.WARN)
+          return
+        end
+        vim.system { 'tmux', 'new-window', '-n', 'codex', 'codex' }
+      end
+
       vim.keymap.set('n', '<leader>cc', claude_open, {
         desc = '[C]laude [C]ode',
+      })
+
+      vim.keymap.set('n', '<leader>cC', codex_open, {
+        desc = '[C]odex',
       })
 
       vim.keymap.set('n', '<leader>ct', '<cmd>ToggleTerm direction=horizontal<CR>', {
