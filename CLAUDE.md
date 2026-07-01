@@ -143,8 +143,9 @@ require('lspconfig').server_name.setup { ... }
 ### Adding Linters
 1. Edit `lua/kickstart/plugins/lint.lua`
 2. Add to `linters_by_ft` table
-3. Configure linter if needed (see eslint_d example for complex config)
-4. Test: Open file, trigger lint event, check diagnostics
+3. Add the linter's Mason package to `ensure_installed` (init.lua) so the binary is installed — omitting this causes `Error running <linter>: ENOENT` on lint events
+4. Configure linter if needed (see eslint_d example for complex config)
+5. Test: Open file, trigger lint event, check diagnostics
 
 ### Modifying Keybindings
 - **LSP keymaps**: Defined in on_attach function (init.lua:~499-558)
@@ -218,7 +219,8 @@ require('lspconfig').server_name.setup { ... }
 
 ### Markdownlint Configuration
 - Global config at `~/.markdownlintrc` (relaxed: no line length, blank line rules)
-- Applies to all projects, not just this one
+- Installed via Mason (`markdownlint` in mason-tool-installer `ensure_installed`)
+- Discovered via markdownlint's parent-folder search: applies to all projects under `~` (e.g. `~/source/*`); a project with its own `.markdownlintrc` overrides it
 
 ### Treesitter Context
 - Shows sticky headers for functions/components at top of window

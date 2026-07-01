@@ -833,9 +833,16 @@ require('lazy').setup({
       require('mason-lspconfig').setup()
 
       local ensure_installed = {
+        -- Formatters
         'stylua',
         'goimports',
         'gofumpt',
+        'prettier',
+        'prettierd',
+        -- Linters
+        'markdownlint',
+        'eslint_d',
+        -- LSP servers
         'jsonls',
         'solargraph',
         'gopls',
