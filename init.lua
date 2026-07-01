@@ -1102,7 +1102,11 @@ require('lazy').setup({
   { -- Flash - Enhanced navigation
     'folke/flash.nvim',
     event = 'VeryLazy',
-    opts = {},
+    opts = {
+      modes = {
+        char = { enabled = false },
+      },
+    },
     keys = {
       {
         's',
