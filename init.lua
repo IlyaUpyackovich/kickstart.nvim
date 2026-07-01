@@ -714,6 +714,18 @@ require('lazy').setup({
       vim.lsp.config('vtsls', {
         on_attach = on_attach,
         capabilities = capabilities,
+        handlers = {
+          ['textDocument/publishDiagnostics'] = function(err, result, ctx, config)
+            if result and result.diagnostics then
+              -- Filter TS80005: 'require' call may be converted to an import
+              local ignored = { [80005] = true }
+              result.diagnostics = vim.tbl_filter(function(d)
+                return not ignored[d.code]
+              end, result.diagnostics)
+            end
+            return vim.lsp.handlers['textDocument/publishDiagnostics'](err, result, ctx, config)
+          end,
+        },
         settings = {
           typescript = {
             inlayHints = {
