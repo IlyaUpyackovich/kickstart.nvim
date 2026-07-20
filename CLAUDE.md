@@ -105,6 +105,7 @@ require('lspconfig').server_name.setup { ... }
 - **Persistent terminals**: Survive closing/navigation (close_on_exit = false)
 - **Claude Code CLI**: `<leader>cc` opens a new Claude session in a tmux window (full screen, skip permissions)
 - **General terminals**: Horizontal (`<leader>ct`), vertical (`<leader>cv`), float (`<leader>cf`)
+- **Terminal instances**: New (`<leader>cn`), select (`<leader>cs`), next/previous (`<leader>c]`/`<leader>c[`); instances share the bottom pane
 - **Quick toggle**: `Ctrl-\` toggles last terminal
 - **Navigation**: `Esc` exits insert mode in terminal buffers
 - **Multiple terminals**: Use `:1ToggleTerm`, `:2ToggleTerm`, etc. for numbered terminals

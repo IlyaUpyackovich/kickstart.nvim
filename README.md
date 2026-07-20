@@ -214,6 +214,9 @@ npm config set save-exact true
 - `Space` + `c` + `t` - Horizontal terminal
 - `Space` + `c` + `v` - Vertical terminal
 - `Space` + `c` + `f` - Floating terminal
+- `Space` + `c` + `n` - New terminal instance in the bottom pane
+- `Space` + `c` + `s` - Select a terminal instance
+- `Space` + `c` + `]` / `[` - Next/previous terminal instance
 
 **Claude Code CLI Integration**:
 - Opens in vertical split (40% width)
@@ -566,6 +569,9 @@ Installs new plugins, removes deleted ones.
 | `<leader>ct` | Horizontal terminal |
 | `<leader>cv` | Vertical terminal |
 | `<leader>cf` | Floating terminal |
+| `<leader>cn` | New terminal instance in bottom pane |
+| `<leader>cs` | Select terminal instance |
+| `<leader>c]` / `<leader>c[` | Next/previous terminal instance |
 | `Esc` (in term) | Exit insert mode |
 | `Ctrl+h/j/k/l` (in term) | Navigate windows |
 
