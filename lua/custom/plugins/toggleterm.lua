@@ -160,7 +160,13 @@ return {
           vim.notify('Codex requires tmux', vim.log.levels.WARN)
           return
         end
-        vim.system { 'tmux', 'new-window', '-n', 'codex', 'codex' }
+        vim.system {
+          'tmux',
+          'new-window',
+          '-n',
+          'codex',
+          '/Users/ilya/.codex/bin/codex-with-secrets',
+        }
       end
 
       vim.keymap.set('n', '<leader>cc', claude_open, {
