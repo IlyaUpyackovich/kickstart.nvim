@@ -144,7 +144,7 @@ return {
           vim.notify('Claude Code requires tmux', vim.log.levels.WARN)
           return
         end
-        vim.system { 'tmux', 'new-window', '-n', 'claude', 'claude --dangerously-skip-permissions' }
+        vim.system { 'tmux', 'new-window', '-n', 'claude', '/Users/ilya/.claude/bin/claude-with-secrets' }
       end
 
       -- Keybindings
