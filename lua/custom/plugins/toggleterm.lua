@@ -166,6 +166,7 @@ return {
           '-n',
           'codex',
           '/Users/ilya/.codex/bin/codex-with-secrets',
+          '--no-daemon',
         }
       end
 
