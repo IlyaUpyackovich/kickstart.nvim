@@ -120,6 +120,19 @@ vim.opt.showmode = false
 --  Schedule the setting after `UiEnter` because it can increase startup-time.
 --  Remove this option if you want your OS clipboard to remain independent.
 --  See `:help 'clipboard'`
+--  Over SSH there is no local clipboard tool, so copy via OSC 52 (tmux needs `set-clipboard on`).
+--  Paste from Nvim's own register: OSC 52 reads are blocked by tmux/most terminals and would stall.
+if vim.env.SSH_TTY or vim.env.SSH_CONNECTION then
+  local osc52 = require 'vim.ui.clipboard.osc52'
+  local function paste()
+    return { vim.fn.split(vim.fn.getreg '', '\n'), vim.fn.getregtype '' }
+  end
+  vim.g.clipboard = {
+    name = 'OSC 52',
+    copy = { ['+'] = osc52.copy '+', ['*'] = osc52.copy '*' },
+    paste = { ['+'] = paste, ['*'] = paste },
+  }
+end
 vim.schedule(function()
   vim.opt.clipboard = 'unnamedplus'
 end)
