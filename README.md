@@ -218,11 +218,11 @@ npm config set save-exact true
 - `Space` + `c` + `s` - Select a terminal instance
 - `Space` + `c` + `]` / `[` - Next/previous terminal instance
 
-**Claude Code CLI Integration**:
-- Opens in vertical split (40% width)
-- Session persists when hidden - no lost context!
-- Auto-starts in project folder
-- Toggle visibility without losing your conversation
+**AI Agents (Claude Code / Codex)**:
+- `Space` + `c` + `c` - New Claude Code session in a tmux window
+- `Space` + `c` + `C` - New Codex session in a tmux window
+- Requires running nvim inside tmux; starts in nvim's working directory
+- Uses `~/.claude/bin/claude-with-secrets` / `~/.codex/bin/codex-with-secrets` if present, otherwise `claude` / `codex` from PATH
 
 **Multiple Terminals**:
 ```vim

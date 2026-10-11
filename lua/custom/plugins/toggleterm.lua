@@ -138,13 +138,36 @@ return {
         lazygit_terminal:toggle()
       end
 
-      -- Claude Code: always open new session in tmux window
-      local function claude_open()
+      -- AI agents: open a new session in a tmux window, in nvim's cwd and with nvim's PATH
+      -- (so mise-managed tool versions match). Prefers the machine-local secrets wrapper
+      -- (macOS keychain) when present, otherwise the plain CLI from PATH.
+      local function agent_open(name, wrapper, args)
         if not vim.env.TMUX then
-          vim.notify('Claude Code requires tmux', vim.log.levels.WARN)
+          vim.notify(name .. ' requires tmux', vim.log.levels.WARN)
           return
         end
-        vim.system { 'tmux', 'new-window', '-n', 'claude', '/Users/ilya/.claude/bin/claude-with-secrets' }
+        local bin = vim.fn.expand(wrapper)
+        if vim.fn.executable(bin) == 0 then
+          bin = vim.fn.exepath(name)
+        end
+        if bin == '' then
+          vim.notify(name .. ' not found (no wrapper and not on PATH)', vim.log.levels.ERROR)
+          return
+        end
+        local cmd = { 'tmux', 'new-window', '-n', name, '-c', vim.fn.getcwd(), '-e', 'PATH=' .. vim.env.PATH, bin }
+        vim.list_extend(cmd, args or {})
+        vim.system(cmd, {}, function(res)
+          if res.code ~= 0 then
+            vim.schedule(function()
+              vim.notify('Failed to open ' .. name .. ': ' .. res.stderr, vim.log.levels.ERROR)
+            end)
+          end
+        end)
+      end
+
+      -- Claude Code: always open new session in tmux window
+      local function claude_open()
+        agent_open('claude', '~/.claude/bin/claude-with-secrets')
       end
 
       -- Keybindings
@@ -156,18 +179,7 @@ return {
 
       -- Codex: open new session in tmux window
       local function codex_open()
-        if not vim.env.TMUX then
-          vim.notify('Codex requires tmux', vim.log.levels.WARN)
-          return
-        end
-        vim.system {
-          'tmux',
-          'new-window',
-          '-n',
-          'codex',
-          '/Users/ilya/.codex/bin/codex-with-secrets',
-          '--no-daemon',
-        }
+        agent_open('codex', '~/.codex/bin/codex-with-secrets', { '--no-daemon' })
       end
 
       vim.keymap.set('n', '<leader>cc', claude_open, {
