@@ -103,7 +103,8 @@ require('lspconfig').server_name.setup { ... }
 ### Terminal Management
 - **Plugin**: toggleterm.nvim (lua/custom/plugins/toggleterm.lua)
 - **Persistent terminals**: Survive closing/navigation (close_on_exit = false)
-- **Claude Code CLI**: `<leader>cc` opens a new Claude session in a tmux window (full screen, skip permissions)
+- **AI agents**: `<leader>cc` (Claude Code) / `<leader>cC` (Codex, `--no-daemon`) open a new session in a tmux window, in nvim's cwd and with nvim's PATH (so mise tool versions match)
+- **Agent binaries**: prefer machine-local secrets wrappers `~/.claude/bin/claude-with-secrets` / `~/.codex/bin/codex-with-secrets` (macOS keychain) when present, else `claude` / `codex` from PATH (Linux). Never hardcode home paths
 - **General terminals**: Horizontal (`<leader>ct`), vertical (`<leader>cv`), float (`<leader>cf`)
 - **Terminal instances**: New (`<leader>cn`), select (`<leader>cs`), next/previous (`<leader>c]`/`<leader>c[`); instances share the bottom pane
 - **Quick toggle**: `Ctrl-\` toggles last terminal
@@ -121,6 +122,8 @@ require('lspconfig').server_name.setup { ... }
 - **Status bar**: Minimal tokyonight-themed
 - **Plugin manager**: TPM (`~/.tmux/plugins/tpm`) — run `prefix + I` to install plugins
 - **Helper**: `tdev [name]` — creates/attaches to tmux session (defaults to current directory name)
+- **Helper scripts** (Debian): `~/.local/bin/tdev`, `~/.local/bin/tmux-sessionizer` (fzf over `~/source/*`); shell `Ctrl-f` bound in `~/.bashrc`
+- **Clipboard**: `set -g set-clipboard on` so nvim's OSC 52 copies reach the local terminal over SSH
 
 ## Making Changes Safely
 
@@ -191,7 +194,7 @@ require('lspconfig').server_name.setup { ... }
 
 ### Commit Messages
 - Use conventional commits: `feat:`, `fix:`, `refactor:`, `docs:`, `chore:`
-- Include `Co-Authored-By: Claude <model> <noreply@anthropic.com>`
+- No AI attribution: no `Co-Authored-By` trailers or "Generated with" lines
 - Keep individual commits focused (one fix per commit preferred)
 
 ### Testing Changes
@@ -208,6 +211,11 @@ require('lspconfig').server_name.setup { ... }
 - Inlay hints enabled for TypeScript and Go
 
 ## Critical Notes
+
+### Clipboard over SSH
+- `clipboard=unnamedplus`; locally (macOS) uses pbcopy
+- Over SSH (`SSH_TTY`/`SSH_CONNECTION` set) `vim.g.clipboard` forces OSC 52 for copy, paste comes from Nvim's unnamed register (OSC 52 reads stall under tmux)
+- Requires `set -g set-clipboard on` in `~/.tmux.conf` and a terminal with OSC 52 support
 
 ### Neo-tree Auto-Open
 - Opens automatically on `nvim .` via VimEnter autocmd
@@ -230,15 +238,16 @@ require('lspconfig').server_name.setup { ... }
 
 ## External Dependencies
 
+**Platforms**: macOS (local) and Debian 13 (over SSH). Keep config portable: no hardcoded `/Users/...` paths, no OS-specific tools without a fallback.
+
 **Required**:
-- Neovim 0.11+ (for vim.lsp.config API)
+- Neovim 0.11+ (for vim.lsp.config API). Debian's apt package is too old (0.10) — use the GitHub release tarball in `/opt/nvim-linux-x86_64`, symlinked to `/usr/local/bin/nvim`
 - Git (for lazy.nvim)
-- Node.js + npm (for TypeScript tooling, package-info)
-- Go (for gopls, goimports, gofumpt)
+- mise (runtime versions): Node.js + npm (TypeScript tooling, package-info, Mason npm packages), Go (gopls, goimports, gofumpt), Ruby (solargraph). Mason needs these on PATH or installs fail
 
 **Optional**:
-- tmux 3.5+ (for Claude Code integration, `brew install tmux`)
-- fd (faster file finding for Telescope)
+- tmux 3.5+ (for Claude Code integration; `brew install tmux` / `apt install tmux`)
+- fd (faster file finding for Telescope; on Debian `apt install fd-find` + symlink `fdfind` to `~/.local/bin/fd`)
 - ripgrep (faster grep for Telescope)
 - lazygit (git TUI)
 - prettierd (faster prettier formatting)
